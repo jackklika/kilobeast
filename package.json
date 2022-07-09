@@ -1,0 +1,19 @@
+{
+  "name": "kilobeast",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "mineflayer": "^4.3.0",
+    "mineflayer-pathfinder": "^2.2.0",
+    "mineflayer-statemachine": "^1.6.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
