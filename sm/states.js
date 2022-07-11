@@ -34,13 +34,11 @@ class DepositFurnaceBehavior {
     onStateEntered = async function () {
         
         // Get block at state-stored position
-        console.log(this.targets.position)
         if (this.targets.position == undefined) {
             console.log("could not find block")
             return
         }
         var furnaceBlock = this.bot.blockAt(this.targets.position)
-        console.log(furnaceBlock)
 
         // Open furnace
         /// Returns promise on a mineflayer.furnace
@@ -214,7 +212,7 @@ function createCook(bot, itemCode)
     const exit = new BehaviorIdle();
 
     const getClosestBlock = new BehaviorFindBlock(bot, targets) // furance
-    getClosestBlock.blocks = [248]
+    getClosestBlock.blocks = [61]
     getClosestBlock.maxDistance = 256
 
     const getInteractPosition = new BehaviorFindInteractPosition(bot, targets)
@@ -251,7 +249,7 @@ function createCook(bot, itemCode)
             parent: getInteractPosition,
             child: moveToPosition,
             onTransition: () => {
-                console.log("getInteractPosition > moveToPosition", targets)
+                console.log("getInteractPosition > moveToPosition", targets, "111")
             },
             shouldTransition: () => (targets.position !== undefined),
         }),
