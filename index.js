@@ -6,12 +6,12 @@ import mineflayer from 'mineflayer'
 import { pathfinder } from 'mineflayer-pathfinder'
 import { plugin } from 'mineflayer-pvp'
 
-import { createFollowPlayerState, createKill} from "./sm/states.js"
+import { createKillCook } from "./sm/states.js"
 
 import { BotStateMachine } from 'mineflayer-statemachine'
 
 const HOST = "localhost"
-const PORT = 50520
+const PORT = 58399
 
 function makeBot(_username, _password) {
   return new Promise((resolve, reject) => {
@@ -35,7 +35,7 @@ function makeBot(_username, _password) {
         // to start on the getClosestPlayer state, so we'll specify that here.
       
         //const rootLayer = createFollowPlayerState(bot)
-        const rootLayer = createKill(bot, "pig")
+        const rootLayer = createKillCook(bot, "pig")
         
 
         // We can start our state machine simply by creating a new instance.
@@ -43,8 +43,9 @@ function makeBot(_username, _password) {
 
         bot.on('chat', (username, message) => {
           if (message == "debug") {
-            bot.chat(`♥${parseInt(bot.health)} ☙${parseInt(bot.food)} active state: [${rootLayer.activeState.stateName}] target: ${bot.target}`)
+            bot.chat(`♥${parseInt(bot.health)} ☙${parseInt(bot.food)} [${rootLayer.activeState.activeState.stateName}]`)
             console.log(bot.inventory.count(763)) //porkchop 1.18
+            console.log(bot.username, " -- ", rootLayer.activeState.activeState)
           }
         })
 
@@ -63,7 +64,7 @@ async function main() {
 
 
   const bots = (await Promise.allSettled(botProms)).map(({ value, reason }) => value || reason).filter(value => !(value instanceof Error))
-  console.log("bots logged in ", bots)
+  console.log("bots logging in", bots)
 }
 
 main()
