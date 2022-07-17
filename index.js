@@ -6,12 +6,12 @@ import mineflayer from 'mineflayer'
 import { pathfinder } from 'mineflayer-pathfinder'
 import { plugin } from 'mineflayer-pvp'
 
-import { createKillCook } from "./sm/states.js"
+import { createRootState, createKillCook } from "./sm/states.js"
 
-import { BotStateMachine } from 'mineflayer-statemachine'
+import { BotStateMachine, StateTransition } from 'mineflayer-statemachine'
 
 const HOST = "localhost"
-const PORT = 58399
+const PORT = 53988
 
 function makeBot(_username, _password) {
   return new Promise((resolve, reject) => {
@@ -34,25 +34,45 @@ function makeBot(_username, _password) {
         // Now we just wrap our transition list in a nested state machine layer. We want the bot
         // to start on the getClosestPlayer state, so we'll specify that here.
       
-        //const rootLayer = createFollowPlayerState(bot)
-        const rootLayer = createKillCook(bot, "pig")
-        
+        //const rootLayer = createKillCook(bot, "pig")
+        const rootLayer = createRootState(bot)
+
 
         // We can start our state machine simply by creating a new instance.
-        new BotStateMachine(bot, rootLayer);
+        const botStateMachine = new BotStateMachine(bot, rootLayer);
 
         bot.on('chat', (username, message) => {
+
           if (message == "debug") {
             bot.chat(`♥${parseInt(bot.health)} ☙${parseInt(bot.food)} [${rootLayer.activeState.activeState.stateName}]`)
-            console.log(bot.inventory.count(763)) //porkchop 1.18
-            console.log(bot.username, " -- ", rootLayer.activeState.activeState)
+            //console.log(bot.inventory.count(763)) //porkchop 1.18
+            //console.log(bot.username, " -- ", rootLayer.activeState.activeState)
           }
-        })
 
+          if (message == "follow") {
+            console.log(bot.username, "follow")
+            console.log(botStateMachine.transitions)
+            const transitionList = botStateMachine.transitions.filter(function(obj) {
+              return obj.name === "followPlayer"
+            })
+            const t = transitionList[0] // be more careful here
+            t.trigger()
+          }
+
+          if (message == "killCook") {
+            const transitionList = botStateMachine.transitions.filter(function(obj) {
+              return obj.name === "killCook"
+            })
+            const t = transitionList[0] // be more careful here
+            t.trigger()
+          }
+
+        })
+        
       })
 
       bot.on('error', (err) => reject(err))
-      setTimeout(() => reject(Error('Took too long to spawn.')), 5000*5) // 5 sec
+      //setTimeout(() => reject(Error('Took too long to spawn.')), 5000*5) // 5 sec
     }, 500)
   })
 }
@@ -64,7 +84,7 @@ async function main() {
 
 
   const bots = (await Promise.allSettled(botProms)).map(({ value, reason }) => value || reason).filter(value => !(value instanceof Error))
-  console.log("bots logging in", bots)
+  console.log(`${bots.length} bots logging in...`)
 }
 
 main()

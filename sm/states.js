@@ -49,8 +49,63 @@ class DepositFurnaceBehavior {
     };
 }
 
-function createFollowPlayerState(bot)
+function createRootState(bot) {
+
+    const stateName = "rootState"
+
+    const targets = {}
+
+    const enter = new BehaviorIdle();
+    const exit = new BehaviorIdle();
+
+    const killCookBehavior = createKillCook(bot, "pig")
+    const followPlayerBehavior = createFollowPlayer(bot)
+
+    var currentBehavior = followPlayerBehavior // todo change to "current orders"
+
+    const transitions = [
+        new StateTransition({
+            parent: enter,
+            child: currentBehavior,
+            shouldTransition: () => true,
+            onTransition: () => {
+                bot.chat("moving to current behavior")
+                console.log("currentBehavior", currentBehavior)
+            }
+        }),
+        new StateTransition({
+            name: "followPlayer",
+            parent: currentBehavior,
+            child: followPlayerBehavior,
+            onTransition: () => {
+                bot.chat("following")
+                currentBehavior = followPlayerBehavior
+                console.log(bot.username, currentBehavior)
+            },
+        }),
+        new StateTransition({
+            name: "killCook",
+            parent: currentBehavior,
+            child: killCookBehavior,
+            onTransition: () => {
+                bot.chat("killCooking")
+                currentBehavior = killCookBehavior
+                console.log(bot.username, currentBehavior)
+            },
+        })
+    ]
+
+    const sm = new NestedStateMachine(transitions, enter, exit);
+    sm.stateName = stateName
+    return sm
+
+}
+
+function createFollowPlayer(bot)
 {
+
+    const stateName = "followPlayer"
+
     const targets = {};
     const playerFilter = EntityFilters().PlayersOnly;
 
@@ -100,11 +155,15 @@ function createFollowPlayerState(bot)
 
     ];
 
-    return new NestedStateMachine(transitions, enter, exit);
+    const sm = new NestedStateMachine(transitions, enter, exit);
+    sm.stateName = stateName
+    return sm
 }
 
 function createKillCook(bot, entityName)
 {
+
+    const stateName = "killCook"
 
     const targets = {};
 
@@ -142,13 +201,17 @@ function createKillCook(bot, entityName)
 
     ]
 
-    return new NestedStateMachine(transitions, enter, exit);
+    const sm = new NestedStateMachine(transitions, enter, exit);
+    sm.stateName = stateName
+    return sm
 
 }
 
-
 function createKill(bot, entityName)
 {
+
+    const stateName = "kill"
+
     const targets = {};
 
     const enter = new BehaviorIdle();
@@ -188,6 +251,9 @@ function createKill(bot, entityName)
             parent: getClosestEntity,
             child: attackEntity,
             shouldTransition: () => targets.entity !== undefined,
+            onTransition: () => {
+                console.log(bot.username, "Transitioning to attack entity")
+            }
         }),
 
         // If the entity dies/disappears, find another
@@ -195,17 +261,25 @@ function createKill(bot, entityName)
             name: "Find new entity",
             parent: attackEntity,
             child: getClosestEntity,
-            shouldTransition: () => ((targets.entity !== undefined)),
+            shouldTransition: () => (!(targets.entity.isValid) || targets.entity === undefined),
+            onTransition: () => {
+                console.log(bot.username, "Finding new entity")
+            }
         }),
 
 
     ];
 
-    return new NestedStateMachine(transitions, enter, exit);
+    const sm = new NestedStateMachine(transitions, enter, exit);
+    sm.stateName = stateName
+    return sm
 }
 
 function createCook(bot, itemCode)
 {
+
+    const stateName = "cook"
+
     const targets = {};
 
     const enter = new BehaviorIdle();
@@ -262,8 +336,10 @@ function createCook(bot, itemCode)
         }),
     ];
 
-    return new NestedStateMachine(transitions, enter, exit);
+    const sm = new NestedStateMachine(transitions, enter, exit);
+    sm.stateName = stateName
+    return sm
 }
 
 
-export { createFollowPlayerState, createKill, createCook, createKillCook};
+export { createFollowPlayer, createKill, createCook, createKillCook, createRootState};
