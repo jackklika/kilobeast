@@ -70,7 +70,7 @@ function createRootState(bot) {
             shouldTransition: () => true,
             onTransition: () => {
                 bot.chat("moving to current behavior")
-                console.log("currentBehavior", currentBehavior)
+                console.log("currentBehavior", currentBehavior.stateName)
             }
         }),
         new StateTransition({
@@ -80,7 +80,7 @@ function createRootState(bot) {
             onTransition: () => {
                 bot.chat("following")
                 currentBehavior = followPlayerBehavior
-                console.log(bot.username, currentBehavior)
+                console.log(bot.username, currentBehavior.stateName)
             },
         }),
         new StateTransition({
@@ -90,7 +90,7 @@ function createRootState(bot) {
             onTransition: () => {
                 bot.chat("killCooking")
                 currentBehavior = killCookBehavior
-                console.log(bot.username, currentBehavior)
+                console.log(bot.username, currentBehavior.stateName)
             },
         })
     ]

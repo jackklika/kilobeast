@@ -50,8 +50,6 @@ function makeBot(_username, _password) {
           }
 
           if (message == "follow") {
-            console.log(bot.username, "follow")
-            console.log(botStateMachine.transitions)
             const transitionList = botStateMachine.transitions.filter(function(obj) {
               return obj.name === "followPlayer"
             })
